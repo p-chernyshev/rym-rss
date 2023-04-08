@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <PackageReference Include="AngleSharp" Version="1.0.1" />
+      <PackageReference Include="AngleSharp.Io" Version="1.0.0" />
     </ItemGroup>
 
 </Project>
