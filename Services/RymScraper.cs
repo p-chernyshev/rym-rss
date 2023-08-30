@@ -1,11 +1,32 @@
-﻿using AngleSharp;
+﻿using System.Globalization;
+using AngleSharp;
 using AngleSharp.Dom;
+using AngleSharp.Html.Dom;
 using AngleSharp.Io.Cookie;
+using Microsoft.EntityFrameworkCore;
+using RymRss.Db;
+using RymRss.Models;
+
 namespace RymRss.Services;
 
-public class RymScraper
+public class RymScraper : BackgroundService
 {
-    private async Task FetchAlbums()
+    private static readonly CultureInfo RymCulture = CultureInfo.CreateSpecificCulture("en-US");
+    private readonly IServiceProvider ServiceProvider;
+
+    public RymScraper(IServiceProvider serviceProvider) => ServiceProvider = serviceProvider;
+
+    protected override async Task ExecuteAsync(CancellationToken cancellationToken)
+    {
+        var document = await GetDocument(cancellationToken);
+        var pageData = ExtractPageAlbumData(document);
+
+        using var scope = ServiceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<RymRssContext>();
+        await UpdateDbAlbumData(dbContext, pageData, cancellationToken);
+    }
+
+    private Task<IDocument> GetDocument(CancellationToken cancellationToken)
     {
         var cookies = new[]
         {
@@ -25,18 +46,56 @@ public class RymScraper
             .WithDefaultLoader();
         var address = "https://rateyourmusic.com/~jiux";
         var context = BrowsingContext.New(config);
-        var document = await context.OpenAsync(address);
-        var artists = document.QuerySelectorAll(".artist");
-        var albums = document.QuerySelectorAll(".album");
+
+        return context.OpenAsync(address, cancellationToken);
+    }
+
+    private IEnumerable<AlbumData> ExtractPageAlbumData(IDocument document)
+    {
+        var artists = document.QuerySelectorAll(".artist").Cast<IHtmlAnchorElement>();
+        var albums = document.QuerySelectorAll(".album").Cast<IHtmlAnchorElement>();
         var parentContainer = artists.First().ParentElement;
         var dates = parentContainer.QuerySelectorAll("div > b");
 
-        foreach (var album in albums)
-        {
-            var artist = artists.Last(artist => artist.CompareDocumentPosition(album).HasFlag(DocumentPositions.Following));
-            var date = dates.Last(date => date.CompareDocumentPosition(album).HasFlag(DocumentPositions.Following));
-            Console.WriteLine($"{date.TextContent} {artist.TextContent} {album.TextContent}");
-        }
+        return albums.Zip(artists, (album, artist) =>
+            {
+                var date = dates.Last(date => date.CompareDocumentPosition(album).HasFlag(DocumentPositions.Following));
+                return new { album, artist, date };
+            })
+            .Select(pageElements => new AlbumData
+            {
+                Title = pageElements.album.TextContent,
+                AlbumId = pageElements.album.Title ?? "",
+                AlbumHref = pageElements.album.Href,
+                Artist = pageElements.artist.TextContent,
+                ArtistId = pageElements.artist.Title ?? "",
+                ArtistHref = pageElements.artist.Href,
+                ReleaseDate = DateOnly.Parse(pageElements.date.TextContent, RymCulture),
+            });
     }
-    
+
+    private async Task UpdateDbAlbumData(RymRssContext dbContext, IEnumerable<AlbumData> pageAlbums, CancellationToken cancellationToken)
+    {
+        var pageAlbumsList = pageAlbums.ToList();
+
+        var pageAlbumIds = pageAlbumsList.Select(albumData => albumData.AlbumId);
+        var existingDbAlbums = await dbContext.Albums
+            .Where(album => pageAlbumIds.Contains(album.AlbumId))
+            .ToDictionaryAsync(
+                album => album,
+                album => pageAlbumsList.First(albumData => albumData.AlbumId == album.AlbumId),
+                cancellationToken);
+        foreach (var (dbAlbum, pageAlbumData) in existingDbAlbums)
+        {
+            if (dbAlbum.Equals(pageAlbumData)) continue;
+            dbAlbum.Update(pageAlbumData);
+        }
+
+        var newAlbums = pageAlbumsList
+            .Where(albumData => !existingDbAlbums.ContainsValue(albumData))
+            .Select(albumData => new Album(albumData));
+        dbContext.Albums.AddRange(newAlbums);
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
 }
