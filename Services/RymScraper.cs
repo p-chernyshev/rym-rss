@@ -12,6 +12,8 @@ namespace RymRss.Services;
 public class RymScraper : BackgroundService
 {
     private static readonly CultureInfo RymCulture = CultureInfo.CreateSpecificCulture("en-US");
+    // TODO Move to configuration
+    private const int RepeatInterval = 60 * 60 * 1000;
 
     private readonly ILogger<RymScraper> Logger;
     private readonly IServiceProvider ServiceProvider;
@@ -20,6 +22,15 @@ public class RymScraper : BackgroundService
         (ServiceProvider, Logger) = (serviceProvider, logger);
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
+    {
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            await ScrapeRymPageAlbums(cancellationToken);
+            await Task.Delay(RepeatInterval, cancellationToken);
+        }
+    }
+
+    private async Task ScrapeRymPageAlbums(CancellationToken cancellationToken)
     {
         try
         {
