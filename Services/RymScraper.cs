@@ -12,21 +12,31 @@ namespace RymRss.Services;
 public class RymScraper : BackgroundService
 {
     private static readonly CultureInfo RymCulture = CultureInfo.CreateSpecificCulture("en-US");
+
+    private readonly ILogger<RymScraper> Logger;
     private readonly IServiceProvider ServiceProvider;
 
-    public RymScraper(IServiceProvider serviceProvider) => ServiceProvider = serviceProvider;
+    public RymScraper(IServiceProvider serviceProvider, ILogger<RymScraper> logger) =>
+        (ServiceProvider, Logger) = (serviceProvider, logger);
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
-        var document = await GetDocument(cancellationToken);
-        var pageData = ExtractPageAlbumData(document);
+        try
+        {
+            var document = await GetDocument(cancellationToken);
+            var pageData = ExtractPageAlbumData(document).ToList();
 
-        using var scope = ServiceProvider.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<RymRssContext>();
-        await UpdateDbAlbumData(dbContext, pageData, cancellationToken);
+            using var scope = ServiceProvider.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<RymRssContext>();
+            await UpdateDbAlbumData(dbContext, pageData, cancellationToken);
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e, "Error updating albums");
+        }
     }
 
-    private Task<IDocument> GetDocument(CancellationToken cancellationToken)
+    private async Task<IDocument> GetDocument(CancellationToken cancellationToken)
     {
         var cookies = new[]
         {
@@ -44,18 +54,30 @@ public class RymScraper : BackgroundService
         var config = Configuration.Default
             .WithCookies(cookieProvider)
             .WithDefaultLoader();
-        var address = "https://rateyourmusic.com/~jiux";
         var context = BrowsingContext.New(config);
+        var address = "https://rateyourmusic.com/~jiux";
 
-        return context.OpenAsync(address, cancellationToken);
+        var document = await context.OpenAsync(address, cancellationToken);
+        if ((int)document.StatusCode >= 400) throw new Exception($"Failed to load document, status: {(int)document.StatusCode} {document.StatusCode}");
+        Logger.LogDebug("Document loaded with status {StatusCode} {StatusText}", (int)document.StatusCode, document.StatusCode);
+        if (document.Body is null || string.IsNullOrWhiteSpace(document.Body.Html())) throw new Exception("Loaded document is empty");
+
+        return document;
     }
 
     private IEnumerable<AlbumData> ExtractPageAlbumData(IDocument document)
     {
-        var artists = document.QuerySelectorAll(".artist").Cast<IHtmlAnchorElement>();
-        var albums = document.QuerySelectorAll(".album").Cast<IHtmlAnchorElement>();
+        var artists = document.QuerySelectorAll(".artist").Cast<IHtmlAnchorElement>().ToList();
+        var albums = document.QuerySelectorAll(".album").Cast<IHtmlAnchorElement>().ToList();
+        if (artists.Count == 0 || albums.Count == 0)
+        {
+            Logger.LogInformation("Parsed list of albums is empty");
+            return Array.Empty<AlbumData>();
+        }
         var parentContainer = artists.First().ParentElement;
-        var dates = parentContainer.QuerySelectorAll("div > b");
+        var dates = parentContainer!.QuerySelectorAll("div > b");
+
+        Logger.LogInformation("Successfully parsed HTML, found {Albums} albums, {Artist} artists, {Dates} dates", albums.Count, artists.Count, dates.Count());
 
         return albums.Zip(artists, (album, artist) =>
             {
@@ -85,17 +107,25 @@ public class RymScraper : BackgroundService
                 album => album,
                 album => pageAlbumsList.First(albumData => albumData.AlbumId == album.AlbumId),
                 cancellationToken);
-        foreach (var (dbAlbum, pageAlbumData) in existingDbAlbums)
+        Logger.LogDebug("Found {Existing} existing albums", existingDbAlbums.Count);
+        var changedDbAlbums = existingDbAlbums
+            .Where(album => !album.Key.Equals(album.Value))
+            .ToList();
+        foreach (var (dbAlbum, pageAlbumData) in changedDbAlbums)
         {
-            if (dbAlbum.Equals(pageAlbumData)) continue;
             dbAlbum.Update(pageAlbumData);
+            Logger.LogTrace("Updated album with id {DbId} {AlbumId}", dbAlbum.Id, dbAlbum.AlbumId);
         }
+        Logger.LogDebug("Updated {Changed} albums", changedDbAlbums.Count);
 
         var newAlbums = pageAlbumsList
             .Where(albumData => !existingDbAlbums.ContainsValue(albumData))
-            .Select(albumData => new Album(albumData));
+            .Select(albumData => new Album(albumData))
+            .ToList();
         dbContext.Albums.AddRange(newAlbums);
+        Logger.LogDebug("Added {New} albums", newAlbums.Count);
 
         await dbContext.SaveChangesAsync(cancellationToken);
+        Logger.LogInformation("Saved {Changed} changed and {New} new albums to DB", changedDbAlbums.Count, newAlbums.Count);
     }
 }
