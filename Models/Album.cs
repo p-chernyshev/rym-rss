@@ -18,6 +18,17 @@ public class Album : AlbumData
         CopyValues(data);
         DateUpdated = DateTime.UtcNow;
     }
+
+    public DateTime DateLastChanged
+    {
+        get
+        {
+            var dates = new List<DateTime>(3) { DateCreated };
+            if (DateUpdated is {} dateUpdated) dates.Add(dateUpdated);
+            if (IsReleased) dates.Add(ReleaseDate.ToDateTime(TimeOnly.MinValue));
+            return dates.Max();
+        }
+    }
 }
 
 public class AlbumData : IEquatable<AlbumData>
@@ -47,4 +58,6 @@ public class AlbumData : IEquatable<AlbumData>
         ArtistHref = other.ArtistHref;
         ReleaseDate = other.ReleaseDate;
     }
+
+    public bool IsReleased => DateOnly.FromDateTime(DateTime.UtcNow) >= ReleaseDate;
 }
