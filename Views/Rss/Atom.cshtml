@@ -10,8 +10,10 @@
     <link href="http://localhost:5000" rel="self"/>
     <updated>@(Model.FirstOrDefault() is {} lastAlbum ? lastAlbum.DateLastChanged : DateTime.UtcNow)</updated>
     <author>
-        <name>RymAtom</name>
+        <name>RYM</name>
     </author>
+    <icon type="image/png">https://e.snmc.io/2.5/img/sonemic.png</icon>
+    <subtitle>An Atom feed of Upcoming albums scraped from RYM</subtitle>
     @foreach (var album in Model) {
         <entry>
             <title>@album.Artist - @album.Title [@(album.IsReleased ? "Released" : "Upcoming")]</title>
@@ -27,6 +29,8 @@
                     </p>
                 ]]>
             </content>
+            <category term="@album.ReleaseType"/>
+            <category term="@(album.IsReleased ? "Released" : "Upcoming")"/>
         </entry>
     }
 </feed>

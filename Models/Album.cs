@@ -60,4 +60,11 @@ public class AlbumData : IEquatable<AlbumData>
     }
 
     public bool IsReleased => DateOnly.FromDateTime(DateTime.UtcNow) >= ReleaseDate;
+    public ReleaseType ReleaseType => AlbumHref.Contains(@"/ep/") ? ReleaseType.Ep : ReleaseType.Album;
+}
+
+public enum ReleaseType
+{
+    Album,
+    Ep,
 }

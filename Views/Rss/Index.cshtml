@@ -14,14 +14,17 @@
             <title>@album.Artist - @album.Title [@(album.IsReleased ? "Released" : "Upcoming")]</title>
             <@("link")>@album.AlbumHref<@("/link")>
             <description>
-                <![CDATA[Release date: @album.ReleaseDate
-                <p>
-                    <a href="@album.ArtistHref" title="@album.ArtistId">@album.Artist</a> - <a href="@album.AlbumHref" title="@album.AlbumId">@album.Title</a>
-                </p>
+                <![CDATA[
+                    Release date: @album.ReleaseDate
+                    <p>
+                        <a href="@album.ArtistHref" title="@album.ArtistId">@album.Artist</a> - <a href="@album.AlbumHref" title="@album.AlbumId">@album.Title</a>
+                    </p>
                 ]]>
             </description>
             <pubDate>@album.DateLastChanged</pubDate>
             <guid isPermaLink="false">@album.AlbumId@album.DateLastChanged</guid>
+            <category>@album.ReleaseType</category>
+            <category>@(album.IsReleased ? "Released" : "Upcoming")</category>
         </item>
     }
 </channel>
