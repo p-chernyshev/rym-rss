@@ -17,21 +17,30 @@ public class RssController : Controller
 
     public async Task<IActionResult> Index()
     {
-        var albums = (await DbContext.Albums.ToListAsync())
+        var albums = await GetOrderedAlbums();
+        var view = View(albums);
+        view.ContentType = "application/rss+xml";
+        return view;
+    }
+
+    public async Task<IActionResult> Atom()
+    {
+        var albums = await GetOrderedAlbums();
+        var view = View(albums);
+        view.ContentType = "application/atom+xml";
+        return view;
+    }
+
+    private async Task<IEnumerable<Album>> GetOrderedAlbums()
+    {
+        // TODO Execute SQL query on DB
+        return (await DbContext.Albums.ToListAsync())
             .OrderByDescending(album => album.DateLastChanged);
-        return RssView(albums);
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-    }
-
-    private ViewResult RssView<TModel>(TModel? model)
-    {
-        var view = View(model);
-        view.ContentType = "application/rss+xml";
-        return view;
     }
 }

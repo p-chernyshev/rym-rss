@@ -1,0 +1,32 @@
+﻿@model IEnumerable<Album>
+@{
+    Layout = null;
+}<?xml version="1.0" encoding="UTF-8"?>
+
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <title>RymAtom</title>
+    @* TODO Generate unique id? *@
+    <id>http://localhost:5000</id>
+    <link href="http://localhost:5000" rel="self"/>
+    <updated>@(Model.FirstOrDefault() is {} lastAlbum ? lastAlbum.DateLastChanged : DateTime.UtcNow)</updated>
+    <author>
+        <name>RymAtom</name>
+    </author>
+    @foreach (var album in Model) {
+        <entry>
+            <title>@album.Artist - @album.Title [@(album.IsReleased ? "Released" : "Upcoming")]</title>
+            <link rel="alternate" type="text/html" href="@album.AlbumHref"/>
+            <id>@album.AlbumId</id>
+            <published>@album.DateCreated</published>
+            <updated>@album.DateLastChanged</updated>
+            <content type="html">
+                <![CDATA[
+                    Release date: @album.ReleaseDate
+                    <p>
+                        <a href="@album.ArtistHref" title="@album.ArtistId">@album.Artist</a> - <a href="@album.AlbumHref" title="@album.AlbumId">@album.Title</a>
+                    </p>
+                ]]>
+            </content>
+        </entry>
+    }
+</feed>
