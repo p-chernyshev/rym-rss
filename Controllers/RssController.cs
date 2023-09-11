@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RymRss.Db;
 using RymRss.Models;
@@ -36,11 +35,5 @@ public class RssController : Controller
         // TODO Execute SQL query on DB
         return (await DbContext.Albums.ToListAsync())
             .OrderByDescending(album => album.DateLastChanged);
-    }
-
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
-    {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }
