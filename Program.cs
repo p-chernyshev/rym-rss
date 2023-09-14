@@ -30,6 +30,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Rss}/{action=Index}/{id?}");
+    pattern: "{controller=Rym}/{action=Rss}");
 
 app.Run("http://localhost:5000");

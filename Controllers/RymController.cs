@@ -5,20 +5,24 @@ using RymRss.Models;
 
 namespace RymRss.Controllers;
 
-public class RssController : Controller
+public class RymController : Controller
 {
     private readonly RymRssContext DbContext;
+    private readonly ILogger<RymController> Logger;
 
-    public RssController(RymRssContext dbContext)
+    public RymController(RymRssContext dbContext, ILogger<RymController> logger)
     {
         DbContext = dbContext;
+        Logger = logger;
     }
 
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Rss()
     {
         var albums = await GetOrderedAlbums();
         var view = View(albums);
         view.ContentType = "application/rss+xml";
+        Logger.LogDebug("Generated RSS view for {Count} albums", albums.Count());
+
         return view;
     }
 
@@ -27,6 +31,8 @@ public class RssController : Controller
         var albums = await GetOrderedAlbums();
         var view = View(albums);
         view.ContentType = "application/atom+xml";
+        Logger.LogDebug("Generated Atom view for {Count} albums", albums.Count());
+
         return view;
     }
 
