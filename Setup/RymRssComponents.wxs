@@ -1,0 +1,10 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Fragment>
+    <ComponentGroup Id="RymRssComponents" Directory="INSTALLFOLDER">
+      <Component Id="ServiceExecutable" Bitness="always64">
+        <File Id="RymRss.exe" Source="..\bin\publish\RymRss.exe" KeyPath="true"/>
+        <RemoveFile Id="ALLFILES" Name="*.*" On="both" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+</Wix>
