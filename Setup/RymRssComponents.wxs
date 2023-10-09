@@ -3,7 +3,20 @@
     <ComponentGroup Id="RymRssComponents" Directory="INSTALLFOLDER">
       <Component Id="ServiceExecutable" Bitness="always64">
         <File Id="RymRss.exe" Source="..\bin\publish\RymRss.exe" KeyPath="true"/>
-        <RemoveFile Id="ALLFILES" Name="*.*" On="both" />
+        <RemoveFile Id="ALLFILES" Name="*.*" On="both"/>
+        <ServiceInstall Id="RymRssServiceInstaller"
+                        Name="RymRssService"
+                        DisplayName="!(loc.ServiceName)"
+                        Description="!(loc.ServiceDescription)"
+                        Type="ownProcess"
+                        Start="auto"
+                        ErrorControl="normal"/>
+        <ServiceControl Id="RymRssServiceStart"
+                        Name="RymRssService"
+                        Start="install"
+                        Stop="both"
+                        Remove="uninstall"
+                        Wait="true"/>
       </Component>
     </ComponentGroup>
   </Fragment>

@@ -13,6 +13,7 @@ builder.Services.AddDbContext<RymRssContext>(options =>
     var dbPath = Path.Join(path, "rymrss.db");
     options.UseSqlite($"Data Source={dbPath}");
 });
+builder.Services.AddWindowsService(options => options.ServiceName = "Rym Rss Service");
 builder.Services.AddHostedService<RymScraper>();
 
 var app = builder.Build();

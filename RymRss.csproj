@@ -4,10 +4,11 @@
         <TargetFramework>net7.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <OutputType>WinExe</OutputType>
+        <OutputType>exe</OutputType>
         <RuntimeIdentifier>win-x64</RuntimeIdentifier>
         <SelfContained>true</SelfContained>
-        <PublishSingleFile>true</PublishSingleFile>
+        <PublishSingleFile Condition="'$(Configuration)' == 'Release'">true</PublishSingleFile>
+        <PublishReadyToRun>true</PublishReadyToRun>
         <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
         <IsTransformWebConfigDisabled>true</IsTransformWebConfigDisabled>
     </PropertyGroup>
@@ -29,6 +30,7 @@
       </PackageReference>
       <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="7.0.4" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.4" />
+      <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="7.0.1" />
     </ItemGroup>
 
 </Project>
