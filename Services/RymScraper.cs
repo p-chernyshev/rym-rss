@@ -55,7 +55,10 @@ public class RymScraper : BackgroundService
             "username=jiux; Expires=Tue, 01-Jan-2030 01:00:00 GMT; Path=/; secure; HttpOnly;",
         };
 
-        var cookiesFileHandler = new LocalFileHandler("cookies.txt");
+        var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+        var appFolderPath = Path.Join(appDataPath, "RymRss");
+        Directory.CreateDirectory(appFolderPath);
+        var cookiesFileHandler = new LocalFileHandler(Path.Join(appFolderPath, "cookies.txt"));
         var cookieProvider = new AdvancedCookieProvider(cookiesFileHandler);
         foreach (var cookie in cookies)
         {

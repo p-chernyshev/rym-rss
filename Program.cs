@@ -7,10 +7,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<RymRssContext>(options =>
 {
-    var folder = Environment.SpecialFolder.LocalApplicationData;
-    var path = Environment.GetFolderPath(folder);
+    var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+    var appFolderPath = Path.Join(appDataPath, "RymRss");
+    Directory.CreateDirectory(appFolderPath);
     // TODO Move to config
-    var dbPath = Path.Join(path, "rymrss.db");
+    var dbPath = Path.Join(appFolderPath, "rymrss.db");
     options.UseSqlite($"Data Source={dbPath}");
 });
 builder.Services.AddWindowsService(options => options.ServiceName = "Rym Rss Service");
