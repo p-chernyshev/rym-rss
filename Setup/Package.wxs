@@ -12,5 +12,9 @@
     </Feature>
 
     <ui:WixUI Id="UI_InstallDir" InstallDirectory="INSTALLFOLDER"/>
+
+    <InstallExecuteSequence>
+      <Custom Action="UpdateDatabase" Before="StartServices" />
+    </InstallExecuteSequence>
   </Package>
 </Wix>

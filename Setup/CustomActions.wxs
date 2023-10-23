@@ -1,0 +1,11 @@
+﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+    <Fragment>
+        <Binary Id="sqlitebundle.exe" SourceFile="..\bin\sqlitebundle.exe" />
+        <CustomAction Id="UpdateDatabase"
+                      BinaryRef="sqlitebundle.exe"
+                      ExeCommand=""
+                      Execute="immediate"
+                      Impersonate="true"
+                      Return="check" />
+    </Fragment>
+</Wix>
