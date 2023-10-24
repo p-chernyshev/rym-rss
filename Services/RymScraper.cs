@@ -4,29 +4,43 @@ using AngleSharp.Dom;
 using AngleSharp.Html.Dom;
 using AngleSharp.Io.Cookie;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using RymRss.Db;
 using RymRss.Models;
+using RymRss.Models.Options;
 
 namespace RymRss.Services;
 
 public class RymScraper : BackgroundService
 {
     private static readonly CultureInfo RymCulture = CultureInfo.CreateSpecificCulture("en-US");
-    // TODO Move to configuration
-    private const int RepeatInterval = 60 * 60 * 1000;
+    private const int IntervalMinutesMultiplier = 60 * 1000;
 
     private readonly ILogger<RymScraper> Logger;
     private readonly IServiceProvider ServiceProvider;
+    private readonly ScrapeOptions ScrapeOptions;
+    private readonly AppOptions AppOptions;
 
-    public RymScraper(IServiceProvider serviceProvider, ILogger<RymScraper> logger) =>
-        (ServiceProvider, Logger) = (serviceProvider, logger);
+    public RymScraper(
+        IServiceProvider serviceProvider,
+        ILogger<RymScraper> logger,
+        IOptions<ScrapeOptions> scrapeOptions,
+        IOptions<AppOptions> appOptions
+    )
+    {
+        ServiceProvider = serviceProvider;
+        Logger = logger;
+        ScrapeOptions = scrapeOptions.Value;
+        AppOptions = appOptions.Value;
+    }
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
+        if (ScrapeOptions.CheckOnLaunch) await ScrapeRymPageAlbums(cancellationToken);
         while (!cancellationToken.IsCancellationRequested)
         {
+            await Task.Delay((int)(ScrapeOptions.IntervalMinutes * IntervalMinutesMultiplier), cancellationToken);
             await ScrapeRymPageAlbums(cancellationToken);
-            await Task.Delay(RepeatInterval, cancellationToken);
         }
     }
 
@@ -55,10 +69,7 @@ public class RymScraper : BackgroundService
             "username=jiux; Expires=Tue, 01-Jan-2030 01:00:00 GMT; Path=/; secure; HttpOnly;",
         };
 
-        var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
-        var appFolderPath = Path.Join(appDataPath, "RymRss");
-        Directory.CreateDirectory(appFolderPath);
-        var cookiesFileHandler = new LocalFileHandler(Path.Join(appFolderPath, "cookies.txt"));
+        var cookiesFileHandler = new LocalFileHandler(Path.Join(AppOptions.WorkingFolder, "cookies.txt"));
         var cookieProvider = new AdvancedCookieProvider(cookiesFileHandler);
         foreach (var cookie in cookies)
         {
@@ -69,11 +80,11 @@ public class RymScraper : BackgroundService
             .WithCookies(cookieProvider)
             .WithDefaultLoader();
         var context = BrowsingContext.New(config);
-        var address = "https://rateyourmusic.com/~jiux";
+        var address = $"https://rateyourmusic.com/~{ScrapeOptions.User}";
 
         var document = await context.OpenAsync(address, cancellationToken);
-        if ((int)document.StatusCode >= 400) throw new Exception($"Failed to load document, status: {(int)document.StatusCode} {document.StatusCode}");
-        Logger.LogDebug("Document loaded with status {StatusCode} {StatusText}", (int)document.StatusCode, document.StatusCode);
+        if ((int)document.StatusCode >= 400) throw new Exception($"Failed to load document '{address}', status: {(int)document.StatusCode} {document.StatusCode}");
+        Logger.LogDebug("Document '{Address}' loaded with status {StatusCode} {StatusText}", address, (int)document.StatusCode, document.StatusCode);
         if (document.Body is null || string.IsNullOrWhiteSpace(document.Body.Html())) throw new Exception("Loaded document is empty");
 
         return document;

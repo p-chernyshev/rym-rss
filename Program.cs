@@ -1,16 +1,24 @@
 using Microsoft.EntityFrameworkCore;
 using RymRss.Db;
+using RymRss.Models.Options;
 using RymRss.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+var appFolderPath = Path.Join(appDataPath, "RymRss");
+Directory.CreateDirectory(appFolderPath);
+var appOptions = builder.Configuration.GetRequiredSection(nameof(AppOptions)).Get<AppOptions>();
+
 builder.Services.AddControllersWithViews();
+builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+{
+    ["AppOptions:WorkingFolder"] = appFolderPath,
+});
+builder.Services.Configure<ScrapeOptions>(builder.Configuration.GetRequiredSection(nameof(ScrapeOptions)));
+builder.Services.Configure<AppOptions>(builder.Configuration.GetRequiredSection(nameof(AppOptions)));
 builder.Services.AddDbContext<RymRssContext>(options =>
 {
-    var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
-    var appFolderPath = Path.Join(appDataPath, "RymRss");
-    Directory.CreateDirectory(appFolderPath);
-    // TODO Move to config
     var dbPath = Path.Join(appFolderPath, "rymrss.db");
     options.UseSqlite($"Data Source={dbPath}");
 });
@@ -34,4 +42,4 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Rym}/{action=Rss}");
 
-app.Run("http://localhost:5000");
+app.Run($"http://localhost:{appOptions!.Port}");

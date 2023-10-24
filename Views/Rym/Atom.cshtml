@@ -1,4 +1,5 @@
 ﻿@model IEnumerable<Album>
+@inject IOptions<AppOptions> AppOptions
 @{
     Layout = null;
 }<?xml version="1.0" encoding="UTF-8"?>
@@ -6,8 +7,8 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <title>RymAtom</title>
     @* TODO Generate unique id? *@
-    <id>http://localhost:5000</id>
-    <link href="http://localhost:5000" rel="self"/>
+    <id>http://localhost:@AppOptions.Value.Port</id>
+    <link href="http://localhost:@AppOptions.Value.Port" rel="self"/>
     <updated>@(Model.FirstOrDefault() is {} lastAlbum ? lastAlbum.DateLastChanged : DateTime.UtcNow)</updated>
     <author>
         <name>RYM</name>
