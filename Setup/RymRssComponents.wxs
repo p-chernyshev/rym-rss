@@ -18,6 +18,14 @@
                         Remove="uninstall"
                         Wait="true"/>
       </Component>
+
+      <Component Id="AppSettings">
+        <File Id="appsettings.json" Source="..\bin\publish\appsettings.json"/>
+
+        <RegistryKey Root='HKLM' Key='Software\RymRss'>
+          <RegistryValue Type='string' Name='SettingsFolder' Value='[INSTALLFOLDER]'/>
+        </RegistryKey>
+      </Component>
     </ComponentGroup>
   </Fragment>
 </Wix>

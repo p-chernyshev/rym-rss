@@ -3,5 +3,6 @@
 public class AppOptions
 {
     public int Port { get; set; }
-    public string WorkingFolder { get; set; }
+    public string SettingsFolder { get; set; }
+    public string DataFolder { get; set; }
 }
