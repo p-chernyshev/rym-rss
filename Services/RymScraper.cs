@@ -63,17 +63,14 @@ public class RymScraper : BackgroundService
 
     private async Task<IDocument> GetDocument(CancellationToken cancellationToken)
     {
-        var cookies = new[]
-        {
-            "is_logged_in=1; Expires=Tue, 01-Jan-2030 01:00:00 GMT; Path=/; HttpOnly;",
-            "username=jiux; Expires=Tue, 01-Jan-2030 01:00:00 GMT; Path=/; secure; HttpOnly;",
-        };
-
         var cookiesFileHandler = new LocalFileHandler(Path.Join(AppOptions.DataFolder, "cookies.txt"));
         var cookieProvider = new AdvancedCookieProvider(cookiesFileHandler);
-        foreach (var cookie in cookies)
+        if (ScrapeOptions.Cookies is { } cookies)
         {
-            cookieProvider.AddCookie(WebCookie.FromString(cookie + "; Domain=rateyourmusic.com"));
+            foreach (var cookie in cookies)
+            {
+                cookieProvider.AddCookie(WebCookie.FromString(cookie + "; Domain=rateyourmusic.com"));
+            }
         }
 
         var config = Configuration.Default
