@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Win32;
 using RymRss.Db;
@@ -6,28 +7,30 @@ using RymRss.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
-var appFolderPath = Path.Join(appDataPath, "RymRss");
-Directory.CreateDirectory(appFolderPath);
-
-string? settingsFolderPath = null;
-using (var key = Registry.LocalMachine.OpenSubKey(@"Software\RymRss"))
+string? dataFolderPath = null;
+string? username = null;
+if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 {
-    if (key?.GetValue("SettingsFolder") is string installFolderKey)
-    {
-        settingsFolderPath = installFolderKey;
-    }
+    using var key = Registry.LocalMachine.OpenSubKey(@"Software\RymRss");
+    if (key?.GetValue("AppOptions:DataFolder") is string dataFolderValue) dataFolderPath = dataFolderValue;
+    if (key?.GetValue("ScrapeOptions:User") is string userValue) username = userValue;
 }
 
-if (settingsFolderPath is not null)
+if (dataFolderPath is not null)
 {
-    builder.Configuration.AddJsonFile(Path.Join(settingsFolderPath, "appsettings.json"));
+    var settingsFilePath = Path.Join(dataFolderPath, "appsettings.json");
+    if (username is not null)
+    {
+        var settingsFileText = File.ReadAllText(settingsFilePath);
+        settingsFileText = settingsFileText.Replace("{{RYM_USERNAME}}", username);
+        File.WriteAllText(settingsFilePath, settingsFileText);
+    }
+    builder.Configuration.AddJsonFile(settingsFilePath);
 }
 builder.Configuration
     .AddInMemoryCollection(new Dictionary<string, string?>
     {
-        ["AppOptions:SettingsFolder"] = settingsFolderPath,
-        ["AppOptions:DataFolder"] = appFolderPath,
+        ["AppOptions:DataFolder"] = dataFolderPath,
     });
 var appOptions = builder.Configuration.GetRequiredSection(nameof(AppOptions)).Get<AppOptions>();
 
@@ -36,11 +39,14 @@ builder.Services.Configure<ScrapeOptions>(builder.Configuration.GetRequiredSecti
 builder.Services.Configure<AppOptions>(builder.Configuration.GetRequiredSection(nameof(AppOptions)));
 builder.Services.AddDbContext<RymRssContext>(options =>
 {
-    var dbPath = Path.Join(appFolderPath, "rymrss.db");
+    var dbPath = Path.Join(dataFolderPath, "rymrss.db");
     options.UseSqlite($"Data Source={dbPath}");
 });
 builder.Services.AddHostedService<RymScraper>();
-builder.Services.AddWindowsService(options => options.ServiceName = "Rym Rss Service");
+if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+{
+    builder.Services.AddWindowsService(options => options.ServiceName = "Rym Rss Service");
+}
 
 var app = builder.Build();
 

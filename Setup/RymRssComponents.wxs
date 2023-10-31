@@ -1,7 +1,7 @@
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
   <Fragment>
-    <ComponentGroup Id="RymRssComponents" Directory="INSTALLFOLDER">
-      <Component Id="ServiceExecutable" Bitness="always64">
+    <ComponentGroup Id="RymRssComponents">
+      <Component Id="ServiceExecutable" Directory="INSTALLFOLDER" Bitness="always64">
         <File Id="RymRss.exe" Source="..\bin\publish\RymRss.exe" KeyPath="true"/>
         <RemoveFile Id="ALLFILES" Name="*.*" On="both"/>
         <ServiceInstall Id="RymRssServiceInstaller"
@@ -19,11 +19,12 @@
                         Wait="true"/>
       </Component>
 
-      <Component Id="AppSettings">
+      <Component Directory="DATAFOLDER" Id="AppSettings">
         <File Id="appsettings.json" Source="..\bin\publish\appsettings.json"/>
 
-        <RegistryKey Root='HKLM' Key='Software\RymRss'>
-          <RegistryValue Type='string' Name='SettingsFolder' Value='[INSTALLFOLDER]'/>
+        <RegistryKey Root="HKLM" Key="Software\RymRss">
+          <RegistryValue Type="string" Name="AppOptions:DataFolder" Value="[DATAFOLDER]"/>
+          <RegistryValue Type="string" Name="ScrapeOptions:User" Value="[RYM_USERNAME]"/>
         </RegistryKey>
       </Component>
     </ComponentGroup>
