@@ -25,6 +25,7 @@
         <RegistryKey Root="HKLM" Key="Software\RymRss">
           <RegistryValue Type="string" Name="AppOptions:DataFolder" Value="[DATAFOLDER]"/>
           <RegistryValue Type="string" Name="ScrapeOptions:User" Value="[RYM_USERNAME]"/>
+          <RegistryValue Type="multiString" Name="ScrapeOptions:Cookies" Value="[RYM_COOKIES]"/>
         </RegistryKey>
       </Component>
     </ComponentGroup>

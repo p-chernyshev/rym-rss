@@ -14,8 +14,14 @@
                 <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
                 <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
 
-                <Control Id="UserLabel" Type="Text" X="20" Y="60" Width="290" Height="20" NoPrefix="yes" Text="!(loc.ServiceSettingsDlgUserLabel)" />
-                <Control Id="UserEdit" Type="Edit" X="20" Y="80" Width="320" Height="18" Property="RYM_USERNAME" />
+                <Control Id="UserLabel" Type="Text" X="20" Y="60" Width="320" Height="17" NoPrefix="yes" Text="!(loc.ServiceSettingsDlgUserLabel)" />
+                <Control Id="UserEdit" Type="Edit" X="20" Y="77" Width="320" Height="17" Property="RYM_USERNAME" />
+
+                <Control Id="CookiesLabel" Type="Text" X="20" Y="106" Width="320" Height="17" NoPrefix="yes" Text="!(loc.ServiceSettingsDlgCookiesLabel)" />
+                <Control Id="CookiesEdit" Type="Edit" X="20" Y="123" Width="320" Height="50" Multiline="yes" Property="RYM_COOKIES" />
+                <Control Id="CookiesExample1Label" Type="Text" X="20" Y="177" Width="320" Height="15" NoPrefix="yes" Text="!(loc.ServiceSettingsDlgCookiesExampleLabel)" />
+                <Control Id="CookiesExample2Label" Type="Text" X="20" Y="192" Width="320" Height="15" NoPrefix="yes" Text="username=example; Expires=Tue, 01-Jan-2030 01:00:00 GMT; Path=/; secure;" />
+                <Control Id="CookiesExample3Label" Type="Text" X="20" Y="207" Width="320" Height="15" NoPrefix="yes" Text="is_logged_in=1; Expires=Tue, 01-Jan-2030 01:00:00 GMT; Path=/; HttpOnly;" />
             </Dialog>
         </UI>
     </Fragment>
