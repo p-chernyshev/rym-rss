@@ -73,7 +73,7 @@ public class RymScraper : BackgroundService
             }
         }
 
-        var config = Configuration.Default
+        var config = AngleSharp.Configuration.Default
             .WithCookies(cookieProvider)
             .WithDefaultLoader();
         var context = BrowsingContext.New(config);
