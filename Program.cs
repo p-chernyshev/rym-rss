@@ -12,11 +12,11 @@ if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 {
     builder.Configuration.AddRegistryKey(Registry.LocalMachine, @"Software\RymRss");
 }
-var dataFolderPath = builder.Configuration.GetValue<string?>("AppOptions:DataFolder");
+var settingsFolderPath = builder.Configuration.GetValue<string?>("AppOptions:SettingsFolder");
 var username = builder.Configuration.GetValue<string?>("ScrapeOptions:User");
-if (dataFolderPath is not null)
+if (settingsFolderPath is not null)
 {
-    var settingsFilePath = Path.Join(dataFolderPath, "appsettings.json");
+    var settingsFilePath = Path.Join(settingsFolderPath, "appsettings.json");
     if (username is not null && File.Exists(settingsFilePath))
     {
         var settingsFileText = File.ReadAllText(settingsFilePath);
@@ -25,14 +25,12 @@ if (dataFolderPath is not null)
     }
     builder.Configuration.AddJsonFile(settingsFilePath, true);
 }
-if (dataFolderPath is not null)
-{
-    builder.Configuration
-        .AddInMemoryCollection(new Dictionary<string, string?>
-        {
-            ["AppOptions:DataFolder"] = Environment.ExpandEnvironmentVariables(dataFolderPath),
-        });
-}
+var dataFolderPath = builder.Configuration.GetValue<string?>("AppOptions:DataFolder");
+var extraConfig = new Dictionary<string, string?>();
+if (settingsFolderPath is not null) extraConfig["AppOptions:SettingsFolder"] = Environment.ExpandEnvironmentVariables(settingsFolderPath);
+if (dataFolderPath is not null) extraConfig["AppOptions:DataFolder"] = Environment.ExpandEnvironmentVariables(dataFolderPath);
+builder.Configuration.AddInMemoryCollection(extraConfig);
+
 var appOptions = builder.Configuration.GetRequiredSection(nameof(AppOptions)).Get<AppOptions>()!;
 
 builder.Services.AddControllersWithViews();

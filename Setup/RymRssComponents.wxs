@@ -19,10 +19,13 @@
                         Wait="true"/>
       </Component>
 
-      <Component Directory="DATAFOLDER" Id="AppSettings">
-        <File Id="appsettings.json" Source="..\bin\publish\appsettings.json"/>
+      <Component Directory="INSTALLFOLDER" Id="AppSettings">
+          <File Id="appsettings.json" Source="..\bin\publish\appsettings.json">
+              <Permission User="Users" GenericAll="true" />
+          </File>
 
         <RegistryKey Root="HKLM" Key="Software\RymRss" ForceDeleteOnUninstall="true">
+          <RegistryValue Type="string" Name="AppOptions:SettingsFolder" Value="[INSTALLFOLDER]"/>
           <RegistryValue Type="string" Name="AppOptions:DataFolder" Value="[DATAFOLDER]"/>
           <RegistryValue Type="string" Name="ScrapeOptions:User" Value="[RYM_USERNAME]"/>
           <RegistryValue Type="multiString" Name="ScrapeOptions:Cookies" Value="[RYM_COOKIES]"/>
