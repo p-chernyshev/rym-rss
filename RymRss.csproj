@@ -14,6 +14,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <_ContentIncludedByDefault Remove="Setup\**" />
       <Compile Remove="Setup\**" />
       <Content Remove="Setup\**" />
       <EmbeddedResource Remove="Setup\**" />

@@ -19,7 +19,7 @@
         <entry>
             <title>@album.Artist - @album.Title [@(album.IsReleased ? "Released" : "Upcoming")]</title>
             <link rel="alternate" type="text/html" href="@album.AlbumHref"/>
-            <id>@album.AlbumId</id>
+            <id>@album.AlbumId@album.DateLastChanged</id>
             <published>@album.DateCreated</published>
             <updated>@album.DateLastChanged</updated>
             <content type="html">
