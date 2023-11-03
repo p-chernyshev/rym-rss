@@ -89,8 +89,11 @@ public class RymScraper : BackgroundService
 
     private IEnumerable<AlbumData> ExtractPageAlbumData(IDocument document)
     {
-        var artists = document.QuerySelectorAll(".artist").Cast<IHtmlAnchorElement>().ToList();
-        var albums = document.QuerySelectorAll(".album").Cast<IHtmlAnchorElement>().ToList();
+        var upcomingHeader = document.QuerySelectorAll("th").Single(element => element.Text().Contains("Upcoming"));
+        var upcomingListBlock = upcomingHeader.ParentElement?.NextElementSibling?.FirstElementChild?.FirstElementChild;
+        if (upcomingListBlock is null) throw new Exception("Couldn't find upcoming albums list on page");
+        var artists = upcomingListBlock.QuerySelectorAll<IHtmlAnchorElement>(".artist").ToList();
+        var albums = upcomingListBlock.QuerySelectorAll<IHtmlAnchorElement>(".album").ToList();
         if (artists.Count == 0 || albums.Count == 0)
         {
             Logger.LogInformation("Parsed list of albums is empty");
