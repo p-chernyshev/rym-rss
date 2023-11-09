@@ -8,4 +8,5 @@ public class RymRssContext : DbContext
     public RymRssContext(DbContextOptions options) : base(options) { }
 
     public DbSet<Album> Albums { get; set; }
+    public DbSet<Artist> Artists { get; set; }
 }

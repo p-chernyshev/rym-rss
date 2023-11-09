@@ -2,7 +2,6 @@
 
 public class Album : AlbumData
 {
-    public int Id { get; set; }
     public DateTime DateCreated { get; set; }
     public DateTime? DateUpdated { get; set; }
 
@@ -33,34 +32,33 @@ public class Album : AlbumData
 
 public class AlbumData : IEquatable<AlbumData>
 {
+    public string Id { get; set; }
     public string Title { get; set; }
-    public string AlbumId { get; set; }
-    public string AlbumHref { get; set; }
-    public string Artist { get; set; }
-    public string ArtistId { get; set; }
-    public string ArtistHref { get; set; }
+    public string Href { get; set; }
     public DateOnly ReleaseDate { get; set; }
+
+    public List<Artist> Artists { get; set; } = new();
 
     public bool Equals(AlbumData? other)
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
-        return Title == other.Title && AlbumId == other.AlbumId && AlbumHref == other.AlbumHref && Artist == other.Artist && ArtistId == other.ArtistId && ArtistHref == other.ArtistHref && ReleaseDate.Equals(other.ReleaseDate);
+        return Id == other.Id && Title == other.Title && Href == other.Href && ReleaseDate.Equals(other.ReleaseDate)
+            && Artists.All(artist => other.Artists.Exists(otherArtist => otherArtist.Equals(artist)))
+            && other.Artists.All(otherArtist => Artists.Exists(artist => artist.Equals(otherArtist)));
     }
 
     public void CopyValues(AlbumData other)
     {
         Title = other.Title;
-        AlbumId = other.AlbumId;
-        AlbumHref = other.AlbumHref;
-        Artist = other.Artist;
-        ArtistId = other.ArtistId;
-        ArtistHref = other.ArtistHref;
+        Id = other.Id;
+        Href = other.Href;
+        Artists = other.Artists;
         ReleaseDate = other.ReleaseDate;
     }
 
     public bool IsReleased => DateOnly.FromDateTime(DateTime.UtcNow) >= ReleaseDate;
-    public ReleaseType ReleaseType => AlbumHref.Contains(@"/ep/") ? ReleaseType.Ep : ReleaseType.Album;
+    public ReleaseType ReleaseType => Href.Contains(@"/ep/") ? ReleaseType.Ep : ReleaseType.Album;
 }
 
 public enum ReleaseType

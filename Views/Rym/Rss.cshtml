@@ -12,18 +12,28 @@
     <language>en</language>
     @foreach (var album in Model) {
         <item>
-            <title>@album.Artist - @album.Title [@(album.IsReleased ? "Released" : "Upcoming")]</title>
-            <@("link")>@album.AlbumHref<@("/link")>
+            <title>
+                @for (var i = 0; i < album.Artists.Count; i++)
+                {
+                    @album.Artists[i].Name@if (i < album.Artists.Count - 1) @(", ")
+                }
+                - @album.Title [@(album.IsReleased ? "Released" : "Upcoming")]
+            </title>
+            <@("link")>@album.Href<@("/link")>
             <description>
                 <![CDATA[
                     Release date: @album.ReleaseDate
                     <p>
-                        <a href="@album.ArtistHref" title="@album.ArtistId">@album.Artist</a> - <a href="@album.AlbumHref" title="@album.AlbumId">@album.Title</a>
+                        @for (var i = 0; i < album.Artists.Count; i++)
+                        {
+                            <a href="@album.Artists[i].Href" title="@album.Artists[i].Id">@album.Artists[i].Name</a>@if (i < album.Artists.Count - 1) @(", ")
+                        }
+                         - <a href="@album.Href" title="@album.Id">@album.Title</a>
                     </p>
                 ]]>
             </description>
             <pubDate>@album.DateLastChanged</pubDate>
-            <guid isPermaLink="false">@album.AlbumId@album.DateLastChanged</guid>
+            <guid isPermaLink="false">@album.Id@album.DateLastChanged</guid>
             <category>@album.ReleaseType</category>
             <category>@(album.IsReleased ? "Released" : "Upcoming")</category>
         </item>

@@ -39,7 +39,9 @@ public class RymController : Controller
     private async Task<IEnumerable<Album>> GetOrderedAlbums()
     {
         // TODO Execute SQL query on DB
-        return (await DbContext.Albums.ToListAsync())
+        return (await DbContext.Albums
+                .Include(album => album.Artists)
+                .ToListAsync())
             .OrderByDescending(album => album.DateLastChanged);
     }
 }

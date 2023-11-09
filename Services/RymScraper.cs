@@ -6,6 +6,7 @@ using AngleSharp.Io.Cookie;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using RymRss.Db;
+using RymRss.Extensions;
 using RymRss.Models;
 using RymRss.Models.Options;
 
@@ -92,45 +93,81 @@ public class RymScraper : BackgroundService
         var upcomingHeader = document.QuerySelectorAll("th").Single(element => element.Text().Contains("Upcoming"));
         var upcomingListBlock = upcomingHeader.ParentElement?.NextElementSibling?.FirstElementChild?.FirstElementChild;
         if (upcomingListBlock is null) throw new Exception("Couldn't find upcoming albums list on page");
-        var artists = upcomingListBlock.QuerySelectorAll<IHtmlAnchorElement>(".artist").ToList();
-        var albums = upcomingListBlock.QuerySelectorAll<IHtmlAnchorElement>(".album").ToList();
-        if (artists.Count == 0 || albums.Count == 0)
+        var upcomingListAlbumGroups = upcomingListBlock.Children
+            .SplitBy(element => element.TagName.ToLower() == "br")
+            .ToList();
+        if (!upcomingListAlbumGroups.Any())
         {
             Logger.LogInformation("Parsed list of albums is empty");
             return Array.Empty<AlbumData>();
         }
-        var parentContainer = artists.First().ParentElement;
-        var dates = parentContainer!.QuerySelectorAll("div > b");
+        var dates = upcomingListBlock.QuerySelectorAll("div > b");
 
-        Logger.LogInformation("Successfully parsed HTML, found {Albums} albums, {Artist} artists, {Dates} dates", albums.Count, artists.Count, dates.Count());
-
-        return albums.Zip(artists, (album, artist) =>
+        var albumElements = upcomingListAlbumGroups
+            .Select(group =>
             {
+                var groupElements = group.ToList();
+                var artists = groupElements
+                    .OfType<IHtmlAnchorElement>()
+                    .Where(element => element.ClassList.Contains("artist"))
+                    .Concat(
+                        groupElements.SelectMany(element => element.QuerySelectorAll<IHtmlAnchorElement>(".artist")))
+                    .ToList();
+                var album = groupElements
+                    .OfType<IHtmlAnchorElement>()
+                    .Single(element => element.ClassList.Contains("album"));
                 var date = dates.Last(date => date.CompareDocumentPosition(album).HasFlag(DocumentPositions.Following));
-                return new { album, artist, date };
+                return new { album, artists, date };
             })
-            .Select(pageElements => new AlbumData
-            {
-                Title = pageElements.album.TextContent,
-                AlbumId = pageElements.album.Title ?? "",
-                AlbumHref = pageElements.album.Href,
-                Artist = pageElements.artist.TextContent,
-                ArtistId = pageElements.artist.Title ?? "",
-                ArtistHref = pageElements.artist.Href,
-                ReleaseDate = DateOnly.Parse(pageElements.date.TextContent, RymCulture),
-            });
+            .ToList();
+
+        Logger.LogInformation("Successfully parsed HTML, found {Albums} albums with {Dates} dates", albumElements.Count, dates.Length);
+
+        return albumElements.Select(pageElements => new AlbumData
+        {
+            Title = pageElements.album.TextContent,
+            Id = pageElements.album.Title ?? "",
+            Href = pageElements.album.Href,
+            Artists = pageElements.artists
+                .Select(artist => new Artist
+                {
+                    Name = artist.TextContent,
+                    Id = artist.Title ?? "",
+                    Href = artist.Href,
+                })
+                .ToList(),
+            ReleaseDate = DateOnly.Parse(pageElements.date.TextContent, RymCulture),
+        });
     }
 
     private async Task UpdateDbAlbumData(RymRssContext dbContext, IEnumerable<AlbumData> pageAlbums, CancellationToken cancellationToken)
     {
         var pageAlbumsList = pageAlbums.ToList();
 
-        var pageAlbumIds = pageAlbumsList.Select(albumData => albumData.AlbumId);
+        var allArtists = new Dictionary<string, Artist>(pageAlbumsList.Count);
+        foreach (var album in pageAlbumsList)
+        {
+            for (var i = 0; i < album.Artists.Count; i++)
+            {
+                var artist = album.Artists[i];
+                if (allArtists.TryGetValue(artist.Id, out var existingArtist))
+                {
+                    album.Artists[i] = existingArtist;
+                }
+                else
+                {
+                    allArtists[artist.Id] = artist;
+                }
+            }
+        }
+
+        var pageAlbumIds = pageAlbumsList.Select(albumData => albumData.Id);
         var existingDbAlbums = await dbContext.Albums
-            .Where(album => pageAlbumIds.Contains(album.AlbumId))
+            .Where(album => pageAlbumIds.Contains(album.Id))
+            .Include(album => album.Artists)
             .ToDictionaryAsync(
                 album => album,
-                album => pageAlbumsList.First(albumData => albumData.AlbumId == album.AlbumId),
+                album => pageAlbumsList.First(albumData => albumData.Id == album.Id),
                 cancellationToken);
         Logger.LogDebug("Found {Existing} existing albums", existingDbAlbums.Count);
         var changedDbAlbums = existingDbAlbums
@@ -139,7 +176,7 @@ public class RymScraper : BackgroundService
         foreach (var (dbAlbum, pageAlbumData) in changedDbAlbums)
         {
             dbAlbum.Update(pageAlbumData);
-            Logger.LogTrace("Updated album with id {DbId} {AlbumId}", dbAlbum.Id, dbAlbum.AlbumId);
+            Logger.LogTrace("Updated album with id {AlbumId}", dbAlbum.Id);
         }
         Logger.LogDebug("Updated {Changed} albums", changedDbAlbums.Count);
 

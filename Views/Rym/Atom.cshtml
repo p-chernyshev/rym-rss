@@ -17,16 +17,26 @@
     <subtitle>An Atom feed of Upcoming albums scraped from RYM</subtitle>
     @foreach (var album in Model) {
         <entry>
-            <title>@album.Artist - @album.Title [@(album.IsReleased ? "Released" : "Upcoming")]</title>
-            <link rel="alternate" type="text/html" href="@album.AlbumHref"/>
-            <id>@album.AlbumId@album.DateLastChanged</id>
+            <title>
+                @for (var i = 0; i < album.Artists.Count; i++)
+                {
+                    @album.Artists[i].Name@if (i < album.Artists.Count - 1) @(", ")
+                }
+                - @album.Title [@(album.IsReleased ? "Released" : "Upcoming")]
+            </title>
+            <link rel="alternate" type="text/html" href="@album.Href"/>
+            <id>@album.Id@album.DateLastChanged</id>
             <published>@album.DateCreated</published>
             <updated>@album.DateLastChanged</updated>
             <content type="html">
                 <![CDATA[
                     Release date: @album.ReleaseDate
                     <p>
-                        <a href="@album.ArtistHref" title="@album.ArtistId">@album.Artist</a> - <a href="@album.AlbumHref" title="@album.AlbumId">@album.Title</a>
+                        @for (var i = 0; i < album.Artists.Count; i++)
+                        {
+                            <a href="@album.Artists[i].Href" title="@album.Artists[i].Id">@album.Artists[i].Name</a>@if (i < album.Artists.Count - 1) @(", ")
+                        }
+                         - <a href="@album.Href" title="@album.Id">@album.Title</a>
                     </p>
                 ]]>
             </content>
