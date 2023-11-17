@@ -25,4 +25,22 @@ public static class LinqExtensions
 
         if (group.Count > 0 || !skipEmptyGroups) yield return group;
     }
+
+    public static bool EquivalentBy<TElement, TKey>(
+        this IEnumerable<TElement> first,
+        IEnumerable<TElement> second,
+        Func<TElement, TKey> keySelector,
+        IEqualityComparer<TKey>? comparer = null)
+    {
+        var firstList = first.ToList();
+        var secondList = second.ToList();
+
+        if (firstList.Count != secondList.Count) return false;
+
+        var unionCount = firstList
+            .UnionBy(secondList, keySelector, comparer)
+            .Count();
+
+        return firstList.Count == unionCount;
+    }
 }

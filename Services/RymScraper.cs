@@ -88,7 +88,7 @@ public class RymScraper : BackgroundService
         return document;
     }
 
-    private IEnumerable<AlbumData> ExtractPageAlbumData(IDocument document)
+    private IEnumerable<PageAlbumData> ExtractPageAlbumData(IDocument document)
     {
         var upcomingHeader = document.QuerySelectorAll("th").Single(element => element.Text().Contains("Upcoming"));
         var upcomingListBlock = upcomingHeader.ParentElement?.NextElementSibling?.FirstElementChild?.FirstElementChild;
@@ -99,7 +99,7 @@ public class RymScraper : BackgroundService
         if (!upcomingListAlbumGroups.Any())
         {
             Logger.LogInformation("Parsed list of albums is empty");
-            return Array.Empty<AlbumData>();
+            return Array.Empty<PageAlbumData>();
         }
         var dates = upcomingListBlock.QuerySelectorAll("div > b");
 
@@ -121,15 +121,15 @@ public class RymScraper : BackgroundService
             })
             .ToList();
 
-        Logger.LogInformation("Successfully parsed HTML, found {Albums} albums with {Dates} dates", albumElements.Count, dates.Length);
+        Logger.LogInformation("Successfully parsed HTML, found {CountAlbums} albums with {CountDates} dates", albumElements.Count, dates.Length);
 
-        return albumElements.Select(pageElements => new AlbumData
+        return albumElements.Select(pageElements => new PageAlbumData
         {
             Title = pageElements.album.TextContent,
             Id = pageElements.album.Title ?? "",
             Href = pageElements.album.Href,
             Artists = pageElements.artists
-                .Select(artist => new Artist
+                .Select(artist => new ArtistData
                 {
                     Name = artist.TextContent,
                     Id = artist.Title ?? "",
@@ -140,54 +140,70 @@ public class RymScraper : BackgroundService
         });
     }
 
-    private async Task UpdateDbAlbumData(RymRssContext dbContext, IEnumerable<AlbumData> pageAlbums, CancellationToken cancellationToken)
+    private async Task UpdateDbAlbumData(RymRssContext dbContext, IEnumerable<PageAlbumData> pageAlbums, CancellationToken cancellationToken)
     {
         var pageAlbumsList = pageAlbums.ToList();
 
-        var allArtists = new Dictionary<string, Artist>(pageAlbumsList.Count);
-        foreach (var album in pageAlbumsList)
-        {
-            for (var i = 0; i < album.Artists.Count; i++)
-            {
-                var artist = album.Artists[i];
-                if (allArtists.TryGetValue(artist.Id, out var existingArtist))
-                {
-                    album.Artists[i] = existingArtist;
-                }
-                else
-                {
-                    allArtists[artist.Id] = artist;
-                }
-            }
-        }
+        var allPageArtists = pageAlbumsList
+            .SelectMany(album => album.Artists)
+            .DistinctBy(artist => artist.Id)
+            .ToDictionary(artist => artist.Id, artist => artist);
 
-        var pageAlbumIds = pageAlbumsList.Select(albumData => albumData.Id);
+        var existingDbArtists = await dbContext.Artists
+            .Where(artist => allPageArtists.Keys.Contains(artist.Id))
+            .ToDictionaryAsync(
+                artist => allPageArtists[artist.Id],
+                artist => artist,
+                cancellationToken);
+        Logger.LogDebug("Found {CountExisting} existing artists", existingDbArtists.Count);
+
+        var changedDbArtists = existingDbArtists
+            .Where(artist => !artist.Value.Equals(artist.Key))
+            .ToList();
+        foreach (var (pageArtistData, dbArtist) in changedDbArtists)
+        {
+            dbArtist.Update(pageArtistData);
+            Logger.LogTrace("Updated artist with id {ArtistId}", dbArtist.Id);
+        }
+        Logger.LogDebug("Updated {CountChanged} artists", changedDbArtists.Count);
+
+        var newArtists = allPageArtists.Values
+            .Where(artistData => !existingDbArtists.ContainsKey(artistData))
+            .Select(artistData => new Artist(artistData))
+            .ToList();
+        dbContext.Artists.AddRange(newArtists);
+        Logger.LogDebug("Added {CountNew} artists", newArtists.Count);
+
+        var allDbArtists = existingDbArtists.Values.Concat(newArtists).ToList();
+
+        var pageAlbumIds = pageAlbumsList.Select(albumData => albumData.Id).ToList();
         var existingDbAlbums = await dbContext.Albums
             .Where(album => pageAlbumIds.Contains(album.Id))
             .Include(album => album.Artists)
             .ToDictionaryAsync(
-                album => album,
                 album => pageAlbumsList.First(albumData => albumData.Id == album.Id),
+                album => album,
                 cancellationToken);
-        Logger.LogDebug("Found {Existing} existing albums", existingDbAlbums.Count);
+        Logger.LogDebug("Found {CountExisting} existing albums", existingDbAlbums.Count);
+
         var changedDbAlbums = existingDbAlbums
-            .Where(album => !album.Key.Equals(album.Value))
+            .Where(album => !album.Value.Equals(album.Key))
             .ToList();
-        foreach (var (dbAlbum, pageAlbumData) in changedDbAlbums)
+        foreach (var (pageAlbumData, dbAlbum) in changedDbAlbums)
         {
-            dbAlbum.Update(pageAlbumData);
+            dbAlbum.Update(pageAlbumData, allDbArtists);
             Logger.LogTrace("Updated album with id {AlbumId}", dbAlbum.Id);
         }
-        Logger.LogDebug("Updated {Changed} albums", changedDbAlbums.Count);
+        Logger.LogDebug("Updated {CountChanged} albums", changedDbAlbums.Count);
 
         var newAlbums = pageAlbumsList
-            .Where(albumData => !existingDbAlbums.ContainsValue(albumData))
-            .Select(albumData => new Album(albumData))
+            .Where(albumData => !existingDbAlbums.ContainsKey(albumData))
+            .Select(albumData => new Album(albumData, allDbArtists))
             .ToList();
         dbContext.Albums.AddRange(newAlbums);
-        Logger.LogDebug("Added {New} albums", newAlbums.Count);
+        Logger.LogDebug("Added {CountNew} albums", newAlbums.Count);
 
         await dbContext.SaveChangesAsync(cancellationToken);
-        Logger.LogInformation("Saved {Changed} changed and {New} new albums to DB", changedDbAlbums.Count, newAlbums.Count);
+        Logger.LogInformation("Saved {CountChanged} changed and {CountNew} new albums to DB", changedDbAlbums.Count, newAlbums.Count);
     }
 }

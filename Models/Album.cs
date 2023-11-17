@@ -1,21 +1,57 @@
-﻿namespace RymRss.Models;
+﻿using RymRss.Extensions;
 
-public class Album : AlbumData
+namespace RymRss.Models;
+
+public class AlbumData
+{
+    public string Id { get; set; }
+    public string Title { get; set; }
+    public string Href { get; set; }
+    public DateOnly ReleaseDate { get; set; }
+
+    protected void CopyValues(AlbumData other)
+    {
+        Id = other.Id;
+        Title = other.Title;
+        Href = other.Href;
+        ReleaseDate = other.ReleaseDate;
+    }
+
+    public bool IsReleased => DateOnly.FromDateTime(DateTime.UtcNow) >= ReleaseDate;
+    public ReleaseType ReleaseType => Href.Contains(@"/ep/") ? ReleaseType.Ep : ReleaseType.Album;
+}
+
+public class Album : AlbumData, IEquatable<PageAlbumData>
 {
     public DateTime DateCreated { get; set; }
     public DateTime? DateUpdated { get; set; }
 
+    public List<Artist> Artists { get; set; } = new();
+
     public Album() {}
-    public Album(AlbumData data)
+    public Album(PageAlbumData data, IEnumerable<Artist> allArtists)
     {
         CopyValues(data);
+        Artists = data.Artists
+            .Select(artistData => allArtists.Single(artist => artist.Id == artistData.Id))
+            .ToList();
         DateCreated = DateTime.UtcNow;
     }
 
-    public void Update(AlbumData data)
+    public void Update(PageAlbumData data, IEnumerable<Artist> allArtists)
     {
         CopyValues(data);
+        Artists = data.Artists
+            .Select(artistData => allArtists.Single(artist => artist.Id == artistData.Id))
+            .ToList();
         DateUpdated = DateTime.UtcNow;
+    }
+
+    public bool Equals(PageAlbumData? other)
+    {
+        if (ReferenceEquals(null, other)) return false;
+        return Id == other.Id && Title == other.Title && Href == other.Href && ReleaseDate.Equals(other.ReleaseDate)
+               && Artists.EquivalentBy(other.Artists, artist => artist.Id);
     }
 
     public DateTime DateLastChanged
@@ -30,35 +66,9 @@ public class Album : AlbumData
     }
 }
 
-public class AlbumData : IEquatable<AlbumData>
+public class PageAlbumData : AlbumData
 {
-    public string Id { get; set; }
-    public string Title { get; set; }
-    public string Href { get; set; }
-    public DateOnly ReleaseDate { get; set; }
-
-    public List<Artist> Artists { get; set; } = new();
-
-    public bool Equals(AlbumData? other)
-    {
-        if (ReferenceEquals(null, other)) return false;
-        if (ReferenceEquals(this, other)) return true;
-        return Id == other.Id && Title == other.Title && Href == other.Href && ReleaseDate.Equals(other.ReleaseDate)
-            && Artists.All(artist => other.Artists.Exists(otherArtist => otherArtist.Equals(artist)))
-            && other.Artists.All(otherArtist => Artists.Exists(artist => artist.Equals(otherArtist)));
-    }
-
-    public void CopyValues(AlbumData other)
-    {
-        Title = other.Title;
-        Id = other.Id;
-        Href = other.Href;
-        Artists = other.Artists;
-        ReleaseDate = other.ReleaseDate;
-    }
-
-    public bool IsReleased => DateOnly.FromDateTime(DateTime.UtcNow) >= ReleaseDate;
-    public ReleaseType ReleaseType => Href.Contains(@"/ep/") ? ReleaseType.Ep : ReleaseType.Album;
+    public List<ArtistData> Artists { get; set; } = new();
 }
 
 public enum ReleaseType
