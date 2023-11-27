@@ -32,6 +32,7 @@ if (dataFolderPath is not null) extraConfig["AppOptions:DataFolder"] = Environme
 builder.Configuration.AddInMemoryCollection(extraConfig);
 
 var appOptions = builder.Configuration.GetRequiredSection(nameof(AppOptions)).Get<AppOptions>()!;
+Directory.CreateDirectory(appOptions.DataFolder);
 
 builder.Services.AddControllersWithViews();
 builder.Services.Configure<ScrapeOptions>(builder.Configuration.GetRequiredSection(nameof(ScrapeOptions)));

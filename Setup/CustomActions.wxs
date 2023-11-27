@@ -4,7 +4,7 @@
         <CustomAction Id="UpdateDatabase"
                       BinaryRef="sqlitebundle.exe"
                       ExeCommand=""
-                      Execute="immediate"
+                      Execute="deferred"
                       Impersonate="true"
                       Return="check" />
     </Fragment>
