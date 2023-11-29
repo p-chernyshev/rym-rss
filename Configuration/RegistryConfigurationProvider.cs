@@ -54,8 +54,10 @@ public class RegistryConfigurationProvider : ConfigurationProvider
                 Data[prefixedName] = stringValue;
                 break;
             case RegistryValueKind.MultiString:
-                var multiStringValue = (string[])value;
-                for (int i = 0; i < multiStringValue.Length; i++)
+                var multiStringValue = ((string[])value)
+                    .SelectMany(singleString => singleString.Split('\n', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
+                    .ToList();
+                for (var i = 0; i < multiStringValue.Count; i++)
                 {
                     Data[AddPrefix(prefixedName, i.ToString())] = multiStringValue[i];
                 }

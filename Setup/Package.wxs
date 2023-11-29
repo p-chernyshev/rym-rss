@@ -1,7 +1,7 @@
 ﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
   <Package Name="Rym Rss Service"
            Manufacturer="Ix"
-           Version="1.0.0.0"
+           Version="1.1.0.0"
            UpgradeCode="de2b82bf-3395-436a-aa55-0061a3669ef0">
     <MajorUpgrade DowngradeErrorMessage="!(loc.DowngradeError)" />
 

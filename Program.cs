@@ -13,16 +13,9 @@ if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
     builder.Configuration.AddRegistryKey(Registry.LocalMachine, @"Software\RymRss");
 }
 var settingsFolderPath = builder.Configuration.GetValue<string?>("AppOptions:SettingsFolder");
-var username = builder.Configuration.GetValue<string?>("ScrapeOptions:User");
 if (settingsFolderPath is not null)
 {
     var settingsFilePath = Path.Join(settingsFolderPath, "appsettings.json");
-    if (username is not null && File.Exists(settingsFilePath))
-    {
-        var settingsFileText = File.ReadAllText(settingsFilePath);
-        settingsFileText = settingsFileText.Replace("{{RYM_USERNAME}}", username);
-        File.WriteAllText(settingsFilePath, settingsFileText);
-    }
     builder.Configuration.AddJsonFile(settingsFilePath, true);
 }
 var dataFolderPath = builder.Configuration.GetValue<string?>("AppOptions:DataFolder");

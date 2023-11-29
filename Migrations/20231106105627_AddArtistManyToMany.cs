@@ -26,13 +26,13 @@ namespace RymRss.Migrations
                     table.PrimaryKey("PK_Albums", x => x.Id);
                 });
 
-            migrationBuilder.Sql(
-                @"
-                    INSERT INTO Albums_new (Id, Title, ReleaseDate, DateCreated, DateUpdated, Href)
-                    SELECT AlbumId, Title, ReleaseDate, DateCreated, DateUpdated, AlbumHref
-                    FROM Albums
-                    GROUP BY Albums.AlbumId;
-                ");
+            // migrationBuilder.Sql(
+            //     @"
+            //         INSERT INTO Albums_new (Id, Title, ReleaseDate, DateCreated, DateUpdated, Href)
+            //         SELECT AlbumId, Title, ReleaseDate, DateCreated, DateUpdated, AlbumHref
+            //         FROM Albums
+            //         GROUP BY Albums.AlbumId;
+            //     ");
 
             migrationBuilder.CreateTable(
                 name: "Artists",
@@ -47,13 +47,13 @@ namespace RymRss.Migrations
                     table.PrimaryKey("PK_Artists", x => x.Id);
                 });
 
-            migrationBuilder.Sql(
-                @"
-                    INSERT INTO Artists (Id, Name, Href)
-                    SELECT ArtistId, Artist, ArtistHref
-                    FROM Albums
-                    GROUP BY ArtistId;
-                ");
+            // migrationBuilder.Sql(
+            //     @"
+            //         INSERT INTO Artists (Id, Name, Href)
+            //         SELECT ArtistId, Artist, ArtistHref
+            //         FROM Albums
+            //         GROUP BY ArtistId;
+            //     ");
 
             migrationBuilder.CreateTable(
                 name: "AlbumArtist",
@@ -84,13 +84,13 @@ namespace RymRss.Migrations
                 table: "AlbumArtist",
                 column: "ArtistsId");
 
-            migrationBuilder.Sql(
-                @"
-                    INSERT INTO AlbumArtist (AlbumsId, ArtistsId)
-                    SELECT AlbumId, ArtistId
-                    FROM Albums
-                    GROUP BY Albums.AlbumId;
-                ");
+            // migrationBuilder.Sql(
+            //     @"
+            //         INSERT INTO AlbumArtist (AlbumsId, ArtistsId)
+            //         SELECT AlbumId, ArtistId
+            //         FROM Albums
+            //         GROUP BY Albums.AlbumId;
+            //     ");
 
             migrationBuilder.DropTable(
                 name: "Albums");
@@ -124,15 +124,15 @@ namespace RymRss.Migrations
                     table.PrimaryKey("PK_Albums", x => x.Id);
                 });
 
-            migrationBuilder.Sql(
-                @"
-                    INSERT INTO Albums_new (AlbumId, Title, AlbumHref, DateCreated, DateUpdated, ReleaseDate, ArtistId, Artist, ArtistHref) 
-                    SELECT Albums.Id, Albums.Title, Albums.Href, Albums.DateCreated, Albums.DateUpdated, Albums.ReleaseDate, Artists.Id, Artists.Name, Artists.Href
-                    FROM Albums 
-                        INNER JOIN AlbumArtist ON Albums.Id = AlbumArtist.AlbumsId
-                        INNER JOIN Artists ON AlbumArtist.ArtistsId = Artists.Id
-                    GROUP BY Albums.Id;
-                ");
+            // migrationBuilder.Sql(
+            //     @"
+            //         INSERT INTO Albums_new (AlbumId, Title, AlbumHref, DateCreated, DateUpdated, ReleaseDate, ArtistId, Artist, ArtistHref)
+            //         SELECT Albums.Id, Albums.Title, Albums.Href, Albums.DateCreated, Albums.DateUpdated, Albums.ReleaseDate, Artists.Id, Artists.Name, Artists.Href
+            //         FROM Albums
+            //             INNER JOIN AlbumArtist ON Albums.Id = AlbumArtist.AlbumsId
+            //             INNER JOIN Artists ON AlbumArtist.ArtistsId = Artists.Id
+            //         GROUP BY Albums.Id;
+            //     ");
 
 
             migrationBuilder.DropTable(

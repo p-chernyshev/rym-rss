@@ -4,6 +4,6 @@
     <String Id="ServiceSettingsDlgTitle" Overridable="yes" Value="{\WixUI_Font_Title}Service Settings" />
     <String Id="ServiceSettingsDlgDescription" Overridable="yes" Value="Configure initial settings of the scraping service." />
     <String Id="ServiceSettingsDlgUserLabel" Overridable="yes" Value="Username of a RYM user to scrape Upcoming albums from:" />
-    <String Id="ServiceSettingsDlgCookiesLabel" Overridable="yes" Value="Cookies (optional, one per line):" />
+    <String Id="ServiceSettingsDlgCookiesLabel" Overridable="yes" Value="Cookies (one per line, Ctrl+Enter to add new line):" />
     <String Id="ServiceSettingsDlgCookiesExampleLabel" Overridable="yes" Value="Example format:" />
 </WixLocalization>
