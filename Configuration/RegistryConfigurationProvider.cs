@@ -55,7 +55,7 @@ public class RegistryConfigurationProvider : ConfigurationProvider
                 break;
             case RegistryValueKind.MultiString:
                 var multiStringValue = ((string[])value)
-                    .SelectMany(singleString => singleString.Split('\n', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
+                    .SelectMany(singleString => singleString.Split(new []{"\r\n", "\n"}, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
                     .ToList();
                 for (var i = 0; i < multiStringValue.Count; i++)
                 {
