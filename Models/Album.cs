@@ -8,6 +8,7 @@ public class AlbumData
     public string Title { get; set; }
     public string Href { get; set; }
     public DateOnly ReleaseDate { get; set; }
+    public bool YearOnly { get; set; }
 
     protected void CopyValues(AlbumData other)
     {
@@ -15,6 +16,7 @@ public class AlbumData
         Title = other.Title;
         Href = other.Href;
         ReleaseDate = other.ReleaseDate;
+        YearOnly = other.YearOnly;
     }
 
     public bool IsReleased => DateOnly.FromDateTime(DateTime.UtcNow) >= ReleaseDate;
@@ -50,7 +52,7 @@ public class Album : AlbumData, IEquatable<PageAlbumData>
     public bool Equals(PageAlbumData? other)
     {
         if (ReferenceEquals(null, other)) return false;
-        return Id == other.Id && Title == other.Title && Href == other.Href && ReleaseDate.Equals(other.ReleaseDate)
+        return Id == other.Id && Title == other.Title && Href == other.Href && ReleaseDate.Equals(other.ReleaseDate) && YearOnly == other.YearOnly
                && Artists.EquivalentBy(other.Artists, artist => artist.Id);
     }
 

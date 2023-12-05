@@ -123,20 +123,30 @@ public class RymScraper : BackgroundService
 
         Logger.LogInformation("Successfully parsed HTML, found {CountAlbums} albums with {CountDates} dates", albumElements.Count, dates.Length);
 
-        return albumElements.Select(pageElements => new PageAlbumData
+        return albumElements.Select(pageElements =>
         {
-            Title = pageElements.album.TextContent,
-            Id = pageElements.album.Title ?? "",
-            Href = pageElements.album.Href,
-            Artists = pageElements.artists
-                .Select(artist => new ArtistData
-                {
-                    Name = artist.TextContent,
-                    Id = artist.Title ?? "",
-                    Href = artist.Href,
-                })
-                .ToList(),
-            ReleaseDate = DateOnly.Parse(pageElements.date.TextContent, RymCulture),
+            var yearOnly = false;
+            if (!DateOnly.TryParse(pageElements.date.TextContent, RymCulture, out var releaseDate))
+            {
+                releaseDate = DateOnly.ParseExact(pageElements.date.TextContent, "yyyy", RymCulture);
+                yearOnly = true;
+            }
+            return new PageAlbumData
+            {
+                Title = pageElements.album.TextContent,
+                Id = pageElements.album.Title ?? "",
+                Href = pageElements.album.Href,
+                Artists = pageElements.artists
+                    .Select(artist => new ArtistData
+                    {
+                        Name = artist.TextContent,
+                        Id = artist.Title ?? "",
+                        Href = artist.Href,
+                    })
+                    .ToList(),
+                ReleaseDate = releaseDate,
+                YearOnly = yearOnly,
+            };
         });
     }
 

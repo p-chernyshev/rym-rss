@@ -22,7 +22,7 @@
             <@("link")>@album.Href<@("/link")>
             <description>
                 <![CDATA[
-                    Release date: @album.ReleaseDate
+                    Release date: @(album.YearOnly ? album.ReleaseDate.ToString("yyyy") : album.ReleaseDate)
                     <p>
                         @for (var i = 0; i < album.Artists.Count; i++)
                         {
