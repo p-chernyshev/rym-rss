@@ -1,13 +1,16 @@
-﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+﻿<?define Version="1.1.3.0"?>
+<?define UpgradeCode="de2b82bf-3395-436a-aa55-0061a3669ef0"?>
+
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
   <Package Name="Rym Rss Service"
            Manufacturer="Ix"
-           Version="1.1.2.0"
-           UpgradeCode="de2b82bf-3395-436a-aa55-0061a3669ef0">
+           Version="$(Version)"
+           UpgradeCode="$(UpgradeCode)">
     <MajorUpgrade DowngradeErrorMessage="!(loc.DowngradeError)" />
-    <Upgrade Id="de2b82bf-3395-436a-aa55-0061a3669ef0">
+    <Upgrade Id="$(UpgradeCode)">
       <UpgradeVersion OnlyDetect="true"
                       Property="UPGRADING"
-                      Maximum="1.1.1.0"
+                      Maximum="$(Version)"
                       IncludeMaximum="true" />
     </Upgrade>
     <Property Id="RYM_USERNAME">
