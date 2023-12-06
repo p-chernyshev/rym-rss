@@ -1,0 +1,5 @@
+﻿<WixLocalization xmlns="http://wixtoolset.org/schemas/v4/wxl" Culture="en-US">
+    <String Id="InvalidSettingsDlg_Title" Value="[ProductName] Setup" />
+    <String Id="InvalidSettingsDlgText" Value="Username and cookies are required." />
+    <String Id="InvalidSettingsDlgIconTooltip" Value="Information icon" />
+</WixLocalization>

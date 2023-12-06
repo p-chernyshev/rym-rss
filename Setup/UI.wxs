@@ -47,7 +47,8 @@
             <Publish Dialog="InstallDirDlg" Control="ChangeFolder" Property="_BrowseProperty" Value="[WIXUI_INSTALLDIR]" Order="1" />
             <Publish Dialog="InstallDirDlg" Control="ChangeFolder" Event="SpawnDialog" Value="BrowseDlg" Order="2" />
             <Publish Dialog="ServiceSettingsDlg" Control="Back" Event="NewDialog" Value="InstallDirDlg" />
-            <Publish Dialog="ServiceSettingsDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" />
+            <Publish Dialog="ServiceSettingsDlg" Control="Next" Event="SpawnDialog" Value="InvalidSettingsDlg" Order="1" Condition="NOT (RYM_USERNAME AND RYM_COOKIES)" />
+            <Publish Dialog="ServiceSettingsDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Order="2" Condition="RYM_USERNAME AND RYM_COOKIES" />
             <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="ServiceSettingsDlg" Order="1" Condition="(NOT Installed) AND NOT (UPGRADING AND RYM_USERNAME AND RYM_COOKIES)" />
             <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="InstallDirDlg" Order="2" Condition="(NOT Installed) AND UPGRADING AND RYM_USERNAME AND RYM_COOKIES" />
             <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="3" Condition="Installed AND NOT PATCH" />
