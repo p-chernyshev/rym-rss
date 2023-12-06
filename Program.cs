@@ -22,7 +22,7 @@ builder.Services.AddDbContext<RymRssContext>(options =>
 builder.Services.AddHostedService<RymScraper>();
 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 {
-    builder.Services.AddWindowsService(options => options.ServiceName = "Rym Rss Service");
+    builder.Services.AddWindowsService(options => options.ServiceName = "RYM RSS Service");
 }
 
 var app = builder.Build();

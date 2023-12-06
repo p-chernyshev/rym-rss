@@ -1,8 +1,8 @@
-﻿<?define Version="1.2.0.1"?>
+﻿<?define Version="1.2.0.2"?>
 <?define UpgradeCode="de2b82bf-3395-436a-aa55-0061a3669ef0"?>
 
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
-  <Package Name="Rym Rss Service"
+  <Package Name="RYM RSS Service"
            Manufacturer="Ix"
            Version="$(Version)"
            UpgradeCode="$(UpgradeCode)">
