@@ -20,7 +20,9 @@ public class AlbumData
     }
 
     public bool IsReleased => DateOnly.FromDateTime(DateTime.UtcNow) >= ReleaseDate;
-    public ReleaseType ReleaseType => Href.Contains(@"/ep/") ? ReleaseType.Ep : ReleaseType.Album;
+
+    public ReleaseType ReleaseType =>
+        Enum.GetValues<ReleaseType>().First(type => Href.Contains($"/{type.ToString().ToLower()}/"));
 }
 
 public class Album : AlbumData, IEquatable<PageAlbumData>
@@ -77,4 +79,5 @@ public enum ReleaseType
 {
     Album,
     Ep,
+    Video,
 }

@@ -33,7 +33,7 @@
                 ]]>
             </description>
             <pubDate>@album.DateLastChanged</pubDate>
-            <guid isPermaLink="false">@album.Id@album.DateLastChanged</guid>
+            <guid isPermaLink="false">@album.Id@(album.DateLastChanged == album.DateCreated ? null : album.DateLastChanged)</guid>
             <category>@album.ReleaseType</category>
             <category>@(album.IsReleased ? "Released" : "Upcoming")</category>
         </item>

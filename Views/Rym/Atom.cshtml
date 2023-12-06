@@ -25,7 +25,7 @@
                 - @album.Title [@(album.IsReleased ? "Released" : "Upcoming")]
             </title>
             <link rel="alternate" type="text/html" href="@album.Href"/>
-            <id>@album.Id@album.DateLastChanged</id>
+            <id>@album.Id@(album.DateLastChanged == album.DateCreated ? null : album.DateLastChanged)</id>
             <published>@album.DateCreated</published>
             <updated>@album.DateLastChanged</updated>
             <content type="html">
