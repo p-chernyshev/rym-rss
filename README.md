@@ -7,7 +7,7 @@ RYM RSS is a service that scrapes [Rate Your Music](https://rateyourmusic.com/)'
 RYM RSS can be installed using the pre-built .msi installation executable (Windows x64).
 RYM RSS is registered as a Windows service and runs at Windows startup.
 
-To work, the service needs to be provided with a RYM username and cookies rateyourmusic.com uses to authenticate a registered user.
+To work, the service needs to be provided with a RYM username and cookies rateyourmusic.com uses to authenticate a registered user (at least `username` and `ulv`).
 Cookies can be copied from a browser after signing into rateyourmusic.com.
 In Chrome, cookies can be found in DevTools (F12) - 'Application' tab - Cookies.
 

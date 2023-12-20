@@ -20,8 +20,8 @@
                 <Control Id="CookiesLabel" Type="Text" X="20" Y="106" Width="320" Height="17" NoPrefix="yes" Text="!(loc.ServiceSettingsDlgCookiesLabel)" />
                 <Control Id="CookiesEdit" Type="Edit" X="20" Y="123" Width="320" Height="50" Multiline="yes" Property="RYM_COOKIES" />
                 <Control Id="CookiesExample1Label" Type="Text" X="20" Y="177" Width="320" Height="15" NoPrefix="yes" Text="!(loc.ServiceSettingsDlgCookiesExampleLabel)" />
-                <Control Id="CookiesExample2Label" Type="Text" X="20" Y="192" Width="320" Height="15" NoPrefix="yes" Text="username=example; Expires=Tue, 01-Jan-2030 01:00:00 GMT; Path=/;" />
-                <Control Id="CookiesExample3Label" Type="Text" X="20" Y="207" Width="320" Height="15" NoPrefix="yes" Text="is_logged_in=1; Expires=Tue, 01-Jan-2030 01:00:00 GMT; Path=/; secure; HttpOnly;" />
+                <Control Id="CookiesExample2Label" Type="Text" X="20" Y="192" Width="320" Height="15" NoPrefix="yes" Text="username=example1; Expires=Tue, 01-Jan-2030 01:00:00 GMT; Path=/; HttpOnly;" />
+                <Control Id="CookiesExample3Label" Type="Text" X="20" Y="207" Width="320" Height="15" NoPrefix="yes" Text="ulv=example2; Expires=Tue, 01-Jan-2030 01:00:00 GMT; Path=/; secure; HttpOnly;" />
             </Dialog>
         </UI>
     </Fragment>

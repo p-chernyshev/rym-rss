@@ -11,16 +11,20 @@ namespace RymRss.Extensions;
 
 public static class StartupExtensions
 {
+    private const string RegistryKey = @"Software\RymRss";
+    private const string DefaultSettingsFilename = "appsettings.Default.json";
+    private const string UserSettingsFilename = "appsettings.json";
+
     public static void SetupConfiguration(this WebApplicationBuilder builder)
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            builder.Configuration.AddRegistryKey(Registry.LocalMachine, @"Software\RymRss");
+            builder.Configuration.AddRegistryKey(Registry.LocalMachine, RegistryKey);
         }
 
         var installFolderPath = builder.Configuration.GetValue<string?>($"{nameof(AppOptions)}:{nameof(AppOptions.InstallFolder)}") ?? Environment.CurrentDirectory;
         installFolderPath = Environment.ExpandEnvironmentVariables(installFolderPath);
-        var defaultSettingsFilePath = Path.Join(installFolderPath, "appsettings.Default.json");
+        var defaultSettingsFilePath = Path.Join(installFolderPath, DefaultSettingsFilename);
         var defaultSettingsJson = File.Exists(defaultSettingsFilePath)
             ? File.ReadAllText(defaultSettingsFilePath)
             : null;
@@ -30,7 +34,7 @@ public static class StartupExtensions
         {
             dataFolderPath = Environment.ExpandEnvironmentVariables(dataFolderPath);
             Directory.CreateDirectory(dataFolderPath);
-            var settingsFilePath = Path.Join(dataFolderPath, "appsettings.json");
+            var settingsFilePath = Path.Join(dataFolderPath, UserSettingsFilename);
 
             InitializeUserSettingsFile(defaultSettingsJson, settingsFilePath, builder.Configuration);
 

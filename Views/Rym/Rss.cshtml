@@ -13,11 +13,11 @@
     @foreach (var album in Model) {
         <item>
             <title>
-                @for (var i = 0; i < album.Artists.Count; i++)
+                @(album.IsReleased ? "Released" : "Upcoming"): @for (var i = 0; i < album.Artists.Count; i++)
                 {
                     @album.Artists[i].Name@if (i < album.Artists.Count - 1) @(", ")
                 }
-                - @album.Title [@(album.IsReleased ? "Released" : "Upcoming")]
+                - @album.Title [@album.ReleaseType]
             </title>
             <@("link")>@album.Href<@("/link")>
             <description>

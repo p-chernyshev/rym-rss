@@ -134,7 +134,7 @@ public class RymScraper : BackgroundService
             return new PageAlbumData
             {
                 Title = pageElements.album.TextContent,
-                Id = pageElements.album.Title ?? "",
+                Id = pageElements.album.Title ?? throw new Exception($"Album element ({pageElements.album.TextContent}, {pageElements.album.Href}) doesn't have an Id. Possible reason: invalid cookies."),
                 Href = pageElements.album.Href,
                 Artists = pageElements.artists
                     .Select(artist => new ArtistData
