@@ -1,4 +1,4 @@
-dotnet ef migrations bundle --configuration Release --self-contained -r win-x64 -o bin\sqlitebundle.exe --force
-dotnet publish RymRss.csproj -c Release -o bin\publish
-dotnet build Setup -c Release -p:Platform=x64 --no-dependencies -o Setup\bin
+dotnet publish RymRss --configuration Release --output bin\publish
+dotnet ef migrations bundle --project RymRss --configuration Release --self-contained --target-runtime win-x64 --output bin\sqlitebundle.exe --force
+dotnet build Setup --configuration Release -p:Platform=x64 --no-dependencies --output bin\setup
 @echo Build finished at %DATE% %TIME%

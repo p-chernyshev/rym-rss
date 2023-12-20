@@ -14,7 +14,7 @@
       "dotnetRunMessages": true,
       "executablePath": "dotnet.exe",
       "workingDirectory": "$(ProjectDir)",
-      "commandLineArgs": "watch run -- --project RymRss.csproj",
+      "commandLineArgs": "watch run",
       "launchBrowser": true,
       "applicationUrl": "http://localhost:5000",
       "environmentVariables": {

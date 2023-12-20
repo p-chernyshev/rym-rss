@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33829.357
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RymRss", "RymRss.csproj", "{5D1CF9C8-13C8-4B6F-B56A-88D914A8D7B7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RymRss", "RymRss\RymRss.csproj", "{5D1CF9C8-13C8-4B6F-B56A-88D914A8D7B7}"
 EndProject
 Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "Setup", "Setup\Setup.wixproj", "{079D575E-CB88-4420-8B69-1B509CD1299C}"
 EndProject

@@ -44,20 +44,20 @@ ScrapeOptions:
 
 Before running the code for the first time you need to create the local database:
 
-    dotnet ef database update
+    dotnet ef database update --project RymRss
 
 After that, to launch the program and test the local changes to the code you can use `dotnet watch`:
 
-    dotnet watch run -- --project RymRss.csproj --environment Development
+    dotnet watch run --project RymRss --environment Development
 
 ### Building an installer
 
 To build a Windows x64 .msi installation file you can launch the batch file in the repository root ([build.bat](build.bat)) or run the following commands:
 
 ```batch
-dotnet ef migrations bundle --configuration Release --self-contained -r win-x64 -o bin\sqlitebundle.exe --force
-dotnet publish RymRss.csproj -c Release -o bin\publish
-dotnet build Setup -c Release -p:Platform=x64 --no-dependencies -o Setup\bin
+dotnet publish RymRss --configuration Release --output bin\publish
+dotnet ef migrations bundle --project RymRss --configuration Release --self-contained --target-runtime win-x64 --output bin\sqlitebundle.exe --force
+dotnet build Setup --configuration Release -p:Platform=x64 --no-dependencies --output bin\setup
 ```
 
-The output files will be under [\Setup\bin](./Setup/bin)
+The output files will be under [\bin\setup](./bin/setup)

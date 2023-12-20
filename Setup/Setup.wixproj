@@ -1,6 +1,6 @@
 ﻿<Project Sdk="WixToolset.Sdk/4.0.0">
   <ItemGroup>
-    <ProjectReference Include="..\RymRss.csproj" />
+    <ProjectReference Include="..\RymRss\RymRss.csproj" />
     <PackageReference Include="WixToolset.UI.wixext" Version="4.0.0" />
   </ItemGroup>
 </Project>
