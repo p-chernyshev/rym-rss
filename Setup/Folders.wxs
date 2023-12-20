@@ -1,5 +1,7 @@
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
   <Fragment>
+<!--    TODO Preserve installfolder on upgrade?-->
+<!--    https://learn.microsoft.com/en-us/windows/win32/msi/changing-the-target-location-for-a-directory -->
     <StandardDirectory Id="ProgramFiles6432Folder">
       <Directory Id="INSTALLFOLDER" Name="!(bind.Property.ProductName)" />
     </StandardDirectory>

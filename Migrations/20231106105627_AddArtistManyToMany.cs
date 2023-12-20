@@ -26,6 +26,7 @@ namespace RymRss.Migrations
                     table.PrimaryKey("PK_Albums", x => x.Id);
                 });
 
+            // TODO Add option in installer?
             // migrationBuilder.Sql(
             //     @"
             //         INSERT INTO Albums_new (Id, Title, ReleaseDate, DateCreated, DateUpdated, Href)

@@ -21,6 +21,7 @@
             </title>
             <@("link")>@album.Href<@("/link")>
             <description>
+                @* TODO Extract repeating elements of both feeds into View Components / Partial Views *@
                 <![CDATA[
                     Release date: @(album.YearOnly ? album.ReleaseDate.ToString("yyyy") : album.ReleaseDate)
                     <p>

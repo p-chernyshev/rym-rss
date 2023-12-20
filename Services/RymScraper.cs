@@ -43,6 +43,7 @@ public class RymScraper : BackgroundService
             await Task.Delay((int)(ScrapeOptions.IntervalMinutes * IntervalMinutesMultiplier), cancellationToken);
             await ScrapeRymPageAlbums(cancellationToken);
         }
+        // TODO Track & delay from last scrape
     }
 
     private async Task ScrapeRymPageAlbums(CancellationToken cancellationToken)
@@ -150,6 +151,8 @@ public class RymScraper : BackgroundService
         });
     }
 
+    // TODO Load additional info (cover image)?
+    // TODO Track "currently on page" status?
     private async Task UpdateDbAlbumData(RymRssContext dbContext, IEnumerable<PageAlbumData> pageAlbums, CancellationToken cancellationToken)
     {
         var pageAlbumsList = pageAlbums.ToList();

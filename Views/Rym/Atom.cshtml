@@ -16,6 +16,7 @@
     <icon type="image/png">https://e.snmc.io/2.5/img/sonemic.png</icon>
     <subtitle>An Atom feed of Upcoming albums scraped from RYM</subtitle>
     @foreach (var album in Model) {
+        @* TODO URI Id *@
         <entry>
             <title>
                 @(album.IsReleased ? "Released" : "Upcoming"): @for (var i = 0; i < album.Artists.Count; i++)

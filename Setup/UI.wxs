@@ -1,4 +1,14 @@
 ﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+<!--    TODO Reuse UI instead of duplicating-->
+<!--    <?foreach WIXUIARCH in X86;X64;A64 ?>-->
+<!--    <Fragment>-->
+<!--        <UIRef Id="WixUI_InstallDir_$(WIXUIARCH)" />-->
+<!--        <UI Id="UI_InstallDir_$(WIXUIARCH)">-->
+<!--            <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg" Condition="NOT Installed" />-->
+<!--            <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" />-->
+<!--        </UI>-->
+<!--    </Fragment>-->
+<!--    <?endforeach?>-->
     <?foreach WIXUIARCH in X86;X64;A64 ?>
     <Fragment>
         <UI Id="UI_InstallDir_$(WIXUIARCH)">

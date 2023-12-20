@@ -39,6 +39,7 @@ public class RymController : Controller
     private async Task<IEnumerable<Album>> GetOrderedAlbums()
     {
         // TODO Execute SQL query on DB
+        // .Where(album => album.ReleaseDate >= DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)))
         return (await DbContext.Albums
                 .Include(album => album.Artists)
                 .ToListAsync())

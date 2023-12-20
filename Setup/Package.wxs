@@ -28,6 +28,7 @@
 
     <ui:WixUI Id="UI_InstallDir" InstallDirectory="INSTALLFOLDER"/>
 
+    <!-- TODO Install bundle and launch from installfolder -->
     <InstallExecuteSequence>
       <Custom Action="UpdateDatabase" Before="StartServices" Condition="(&amp;Main=3)"/>
     </InstallExecuteSequence>
